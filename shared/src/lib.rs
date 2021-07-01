@@ -20,6 +20,11 @@ pub struct ClientInfoPublic {
     pub ping: u32,
     pub hide_nametag: bool,
 }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ToastData {
+    pub message: String,
+    pub ttl: u32
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ServerInfo {
@@ -88,6 +93,7 @@ pub enum ServerCommand {
     Chat(String, Option<u32>),
     TransferFile(String),
     SendLua(String),
+    Toast(ToastData),
     PlayerInfoUpdate(ClientInfoPublic),
     VehicleMetaUpdate(VehicleMeta),
     PlayerDisconnected(u32),

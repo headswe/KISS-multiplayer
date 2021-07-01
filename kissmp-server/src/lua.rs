@@ -14,6 +14,7 @@ pub enum LuaCommand {
     RemoveVehicle(u32),
     ResetVehicle(u32),
     SendLua(u32, String),
+    Toast(u32, String, u32),
     SendVehicleLua(u32, String),
     Kick(u32, String),
     SpawnVehicle(VehicleData, Option<u32>),
@@ -157,6 +158,15 @@ impl rlua::UserData for LuaConnection {
                 .unwrap();
             Ok(())
         });
+        methods.add_method("toast", |lua_ctx, this, args: (String, u32) | {
+            let globals = lua_ctx.globals();
+            let sender: MpscChannelSender = globals.get("MPSC_CHANNEL_SENDER")?;
+            sender
+                .0
+                .send(LuaCommand::Toast(this.id, args.0, args.1))
+                .unwrap();
+            Ok(())
+        });
         methods.add_method("kick", |lua_ctx, this, reason: String| {
             let globals = lua_ctx.globals();
             let sender: MpscChannelSender = globals.get("MPSC_CHANNEL_SENDER")?;
@@ -259,6 +269,11 @@ impl Server {
                 SendLua(id, lua) => {
                     if let Some(conn) = self.connections.get_mut(&id) {
                         conn.send_lua(lua.clone()).await;
+                    }
+                }
+                Toast(id, message, ttl) => {
+                    if let Some(conn) = self.connections.get_mut(&id) {
+                        conn.send_toast(message.clone(), ttl).await;
                     }
                 }
                 SendVehicleLua(id, lua) => {

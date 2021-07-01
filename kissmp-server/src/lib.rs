@@ -12,7 +12,7 @@ pub mod server_vehicle;
 
 use incoming::IncomingEvent;
 use server_vehicle::*;
-use shared::{ClientInfoPrivate, ClientInfoPublic, ServerCommand};
+use shared::{ClientInfoPrivate, ClientInfoPublic, ServerCommand, ToastData};
 use vehicle::*;
 
 use anyhow::Error;
@@ -56,6 +56,9 @@ impl Connection {
     }
     pub async fn send_lua(&mut self, lua: String) {
         let _ = self.ordered.send(ServerCommand::SendLua(lua.clone())).await;
+    }
+    pub async fn send_toast(&mut self, msg: String, ttl: u32) {
+        let _ = self.ordered.send(ServerCommand::Toast(ToastData {message: msg.clone(), ttl})).await;
     }
 }
 

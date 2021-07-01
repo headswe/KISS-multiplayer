@@ -10,6 +10,7 @@ local current_download = nil
 
 local socket = require("socket")
 local messagepack = require("lua/common/libs/Lua-MessagePack/MessagePack")
+local guihooks = require("guihooks")
 local ping_send_time = 0
 
 M.players = {}
@@ -146,7 +147,9 @@ end
 local function handle_chat(data)
   kissui.chat.add_message(data[1], nil, data[2])
 end
-
+local function handle_toast(data) 
+    guihooks.message(data['message'], data['ttl'])
+end
 local function onExtensionLoaded()
   message_handlers.VehicleUpdate = vehiclemanager.update_vehicle
   message_handlers.VehicleSpawn = vehiclemanager.spawn_vehicle
@@ -162,6 +165,7 @@ local function onExtensionLoaded()
   message_handlers.CouplerAttached = vehiclemanager.attach_coupler
   message_handlers.CouplerDetached = vehiclemanager.detach_coupler
   message_handlers.ElectricsUndefinedUpdate = vehiclemanager.electrics_diff_update
+  message_handlers.Toast = handle_toast
 end
 
 local function send_data(raw_data, reliable)
